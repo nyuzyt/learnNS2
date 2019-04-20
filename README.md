@@ -173,3 +173,61 @@ ob1 show
 // destroy obj, call to destructor
 ob1 destroy
 ```
+
+## Simulation
+```
+set ns [new Simulator]
+
+// define colors
+$ns color 1 Red
+$ns color 2 Blue
+
+set tr [open  "out.tr" w]
+$ns trace-all $tr
+
+set ftr [open "out.nam" w]
+$ns namtrace-all ftr
+
+set n0 [$ns node]
+
+// set shape and color
+$n0 shape box
+$n0 color green
+
+set n1 [$ns node]
+
+$n1 color red
+
+$ns duplex-link $n0 $n1 2Mb 4ms DropTail
+
+set tcp1 [new Agent/TCP]
+set sink [new Agent/TCPSink]
+
+$ns attach-agent $n0 $tcp1
+$ns attach-agent $n1 $sink
+
+$ns connect $tcp $sink
+
+set ftp [new Application/FTP]
+
+$ftp attach-agent $tcp1
+// set color 1 
+$tcp1 set fid_ 1
+
+proc finish { } {
+    global ns tr ftr
+    $ns flush-trace
+    close $tr
+    close $ftr
+    exec nam out.nam &
+    exit
+}
+
+$ns at .1 "$ftp start"
+$ns at 2.0 "$ftp stop"
+
+$ns at 2.1 "finish"
+
+$ns 
+
+```
